@@ -10,11 +10,6 @@ public class Match {
         this.players = new Pair<>(p1, p2);
     }
 
-    public void getMatch() {
-        this.getPlayers();
-        this.getScore();
-    }
-
     public Player getP1() {
         return players.getKey();
     }
@@ -23,16 +18,16 @@ public class Match {
         return players.getValue();
     }
 
-    public void getPlayers() {
-        System.out.println("Match: " + players.getKey() + " vs " + players.getValue());
+    public String getPlayers() {
+        return "Match: " + players.getKey() + " vs " + players.getValue();
     }
 
-    public void getScore() {
+    public String getScore() {
         if(rp1 == null && rp2 == null) {
-            System.out.println("Score:  - ");
+            return "Score:  - ";
         }
         else {
-            System.out.println("Score: " + this.getRp1() + " - " + this.getRp2());
+            return "Score: " + this.getRp1() + " - " + this.getRp2();
         }
     }
 
