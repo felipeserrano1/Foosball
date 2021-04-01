@@ -1,26 +1,26 @@
 package com.example.foosball.request;
 
 public class DeletePlayerFromTournamentRequest {
-    private int idPlayer, idTournament;
+    private int player_id, tournament_id;
 
-    public DeletePlayerFromTournamentRequest(int idPlayer, int idTournament) {
-        this.idPlayer = idPlayer;
-        this.idTournament = idTournament;
+    public DeletePlayerFromTournamentRequest(int player_id, int tournament_id) {
+        this.player_id = player_id;
+        this.tournament_id = tournament_id;
     }
 
-    public int getIdPlayer() {
-        return idPlayer;
+    public int getPlayer_id() {
+        return player_id;
     }
 
-    public void setIdPlayer(int idPlayer) {
-        this.idPlayer = idPlayer;
+    public void setPlayer_id(int idPlayer) {
+        this.player_id = player_id;
     }
 
-    public int getIdTournament() {
-        return idTournament;
+    public int getTournament_id() {
+        return tournament_id;
     }
 
-    public void setIdTournament(int idTournament) {
-        this.idTournament = idTournament;
+    public void setTournament_id(int idTournament) {
+        this.tournament_id = tournament_id;
     }
 }

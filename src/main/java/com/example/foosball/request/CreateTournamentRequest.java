@@ -6,20 +6,10 @@ import com.example.foosball.Player;
 
 import java.util.ArrayList;
 
-public class TournamentRequest {
+public class CreateTournamentRequest {
     private String name;
-    private int id;
     private ArrayList<Player> players;
     private ArrayList<Match> schedule;
-
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -31,9 +21,10 @@ public class TournamentRequest {
 
     @Override
     public String toString() {
-        return "TournamentRequest{" +
+        return "CreateTournamentRequest{" +
                 "name='" + name + '\'' +
-                "id=" + id + '\'' +
+                ", players=" + players +
+                ", schedule=" + schedule +
                 '}';
     }
 

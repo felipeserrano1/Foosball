@@ -1,6 +1,6 @@
 package com.example.foosball.controllers;
 
-import com.example.foosball.FoosballManager;
+import com.example.foosball.services.FoosballService;
 import com.example.foosball.Player;
 import com.example.foosball.Tournament;
 import com.example.foosball.request.*;
@@ -13,97 +13,98 @@ import java.util.ArrayList;
 
 @RestController
 public class FoosballController {
-    private FoosballManager foosballManager;
+    private FoosballService foosballService;
 
     @Autowired
     public FoosballController() {
-        this.foosballManager = new FoosballManager();
+        this.foosballService = new FoosballService();
     }
 
     @GetMapping("/players")
     public BaseResponse getAllPlayers() {
-        return new BaseResponse(foosballManager.getPlayers(), null);
+        return new BaseResponse(foosballService.getPlayers(), null);
     }
 
-    @GetMapping("/players/{name}")
+    @GetMapping("/players/name/{name}")
     public BaseResponse getPlayerByName(@PathVariable(value="name") String name) {
         Player player;
         try {
-            player = foosballManager.getPlayerByName(name);
-        } catch (IllegalArgumentException e) {
+            player = foosballService.getPlayerByName(name);
+        } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
         return new BaseResponse(player, null);
     }
 
-    @GetMapping("/players/{id}")
+    @GetMapping("/players/id/{id}")
     public BaseResponse getPlayerByID(@PathVariable(value="id") int id) {
         Player player;
         try {
-            player = foosballManager.getPlayerByID(id);
-        } catch (IllegalArgumentException e) {
+            player = foosballService.getPlayerByID(id);
+        } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
-        return new BaseResponse(player.getName() + player.getId(), null);
+        String payload = String.format("id:%d  name:%s  age:%d", player.getId(), player.getName(), player.getAge());
+        return new BaseResponse(payload, null);
     }
 
     @PostMapping("/players")
     public BaseResponse createPlayers(@RequestBody PlayerRequest playerRequest) {
-        return new BaseResponse(foosballManager.createPlayers(playerRequest.getPlayers()), null);
+        return new BaseResponse(foosballService.createPlayers(playerRequest.getPlayers()), null);
     }
 
     @GetMapping("/tournaments/id/{id}")
     public BaseResponse getTournamentByID(@PathVariable(value="id") int id) {
         Tournament tournament;
-
         try {
-            tournament = foosballManager.getTournamentByID(id);
-        } catch (IllegalArgumentException e) {
+            tournament = foosballService.getTournamentByID(id);
+        } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
-
         return new BaseResponse(tournament, null);
     }
 
     @GetMapping("/tournaments/name/{name}")
     public BaseResponse getTournamentByName(@PathVariable(value="name") String name) {
         Tournament tournament;
-
         try {
-            tournament = foosballManager.getTournamentByName(name);
-        } catch (IllegalArgumentException e) {
+            tournament = foosballService.getTournamentByName(name);
+        } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
-
         return new BaseResponse(tournament, null);
     }
 
     @GetMapping("/tournaments")
     public BaseResponse getAllTournaments() {
-        return new BaseResponse(foosballManager.getAllTournaments(), null);
+        return new BaseResponse(foosballService.getAllTournaments(), null);
     }
 
     @PostMapping("/tournaments")
-    public BaseResponse createTournament(@RequestBody TournamentRequest tournamentRequest) {
-        return new BaseResponse(foosballManager.createTournament(tournamentRequest.getName()), null);
+    public BaseResponse createTournament(@RequestBody CreateTournamentRequest createTournamentRequest) {
+        try {
+            return new BaseResponse(foosballService.createTournament(createTournamentRequest.getName()), null);
+        } catch (Exception e) {
+            return new BaseResponse(null, new ErrorResponse(e.getMessage()));
+        }
     }
 
     @PutMapping("/tournaments")
     public BaseResponse addPlayerTournament(@RequestBody AddPlayerToTournamentRequest addPlayerToTournamentRequest) {
         try {
-            new BaseResponse(foosballManager.addPlayerTournament(addPlayerToTournamentRequest.getIdPlayer(), addPlayerToTournamentRequest.getIdTournament()),null);
+            new BaseResponse(foosballService.addPlayerTournament(addPlayerToTournamentRequest.getIdTournament(), addPlayerToTournamentRequest.getPlayer_name(), addPlayerToTournamentRequest.getPlayer_id()),null);
         } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
         return new BaseResponse("Player was added to tournament!",null);
     }
 
-    @GetMapping("/tournaments/{name}/players")
-    public BaseResponse getAllPlayersFromTournament(@PathVariable(value="name") String name) {
+    @GetMapping("/tournaments/{id}/players")
+    public BaseResponse getAllPlayersFromTournament(@PathVariable(value="id") int id) {
         var players = new ArrayList<Player>();
         try {
-            players = foosballManager.getAllPlayersFromTournament(name);
-        } catch (IllegalArgumentException e) {
+            players = foosballService.getAllPlayersFromTournament(id);
+        } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
         return new BaseResponse(players,null);
@@ -112,7 +113,7 @@ public class FoosballController {
     @DeleteMapping("/tournaments")
     public BaseResponse removePlayerFromTournament(@RequestBody DeletePlayerFromTournamentRequest deletePlayerFromTournamentRequest) {
         try {
-            foosballManager.removePlayer(deletePlayerFromTournamentRequest.getIdTournament(), deletePlayerFromTournamentRequest.getIdPlayer());
+            foosballService.removePlayerFromTournament(deletePlayerFromTournamentRequest.getTournament_id(), deletePlayerFromTournamentRequest.getPlayer_id());
         } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }

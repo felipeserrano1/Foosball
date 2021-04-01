@@ -1,16 +1,13 @@
 package com.example.foosball.request;
 
-import java.util.UUID;
-
 public class AddPlayerToTournamentRequest {
-    private int idTournament, idPlayer;
-    private String nameTournament, namePlayer;
+    private int idTournament, player_id;
+    private String player_name;
 
-    public AddPlayerToTournamentRequest(int idTournament, int idPlayer, String nameTournament, String namePlayer) {
+    public AddPlayerToTournamentRequest(int idTournament, int player_id, String player_name) {
         this.idTournament = idTournament;
-        this.idPlayer = idPlayer;
-        this.nameTournament = nameTournament;
-        this.namePlayer = namePlayer;
+        this.player_id = player_id;
+        this.player_name = player_name;
     }
 
     public int getIdTournament() {
@@ -21,27 +18,19 @@ public class AddPlayerToTournamentRequest {
         this.idTournament = idTournament;
     }
 
-    public int getIdPlayer() {
-        return idPlayer;
+    public int getPlayer_id() {
+        return player_id;
     }
 
-    public void setIdPlayer(int idPlayer) {
-        this.idPlayer = idPlayer;
+    public void setPlayer_id(int player_id) {
+        this.player_id = player_id;
     }
 
-    public String getNameTournament() {
-        return nameTournament;
+    public String getPlayer_name() {
+        return player_name;
     }
 
-    public void setNameTournament(String nameTournament) {
-        this.nameTournament = nameTournament;
-    }
-
-    public String getNamePlayer() {
-        return namePlayer;
-    }
-
-    public void setNamePlayer(String namePlayer) {
-        this.namePlayer = namePlayer;
+    public void setPlayer_name(String player_name) {
+        this.player_name = player_name;
     }
 }

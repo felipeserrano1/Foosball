@@ -9,3 +9,4 @@ public class FoosballApplication {
         SpringApplication.run(FoosballApplication.class, args);
     }
 }
+

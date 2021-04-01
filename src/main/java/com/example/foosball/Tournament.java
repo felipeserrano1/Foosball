@@ -1,18 +1,17 @@
 package com.example.foosball;
-
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Tournament {
     private String name;
-    private static final AtomicInteger count = new AtomicInteger(0);
     private int id;
     private ArrayList<Player> players;
     private ArrayList<Match> schedule;
 
-    public Tournament(String name) {
+    public Tournament() {}
+
+    public Tournament(int id, String name) {
+        this.id = id;
         this.name = name;
-        this.id = count.incrementAndGet();
         this.players = new ArrayList<>();
         this.schedule = new ArrayList<>();
     }
@@ -44,6 +43,18 @@ public class Tournament {
 
     public int getId() {
         return this.id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setPlayers(ArrayList<Player> players) {
+        this.players = players;
+    }
+
+    public void setSchedule(ArrayList<Match> schedule) {
+        this.schedule = schedule;
     }
 
     public void addPlayer(Player player) {
