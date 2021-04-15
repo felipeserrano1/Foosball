@@ -1,4 +1,4 @@
-package com.example.foosball.response;
+package com.example.foosball.views.responses;
 
 public class ErrorResponse {
     private String errorMessage;

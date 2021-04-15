@@ -1,4 +1,4 @@
-package com.example.foosball.response;
+package com.example.foosball.views.responses;
 
 public class BaseResponse {
     private Object payload;

@@ -1,11 +1,15 @@
 package com.example.foosball.controllers;
 
+import com.example.foosball.models.TournamentPlayers;
+import com.example.foosball.repository.PlayerRepository;
+import com.example.foosball.repository.TournamentPlayerRepository;
+import com.example.foosball.repository.TournamentRepository;
+import com.example.foosball.views.requests.*;
 import com.example.foosball.services.FoosballService;
-import com.example.foosball.Player;
-import com.example.foosball.Tournament;
-import com.example.foosball.request.*;
-import com.example.foosball.response.BaseResponse;
-import com.example.foosball.response.ErrorResponse;
+import com.example.foosball.models.Player;
+import com.example.foosball.models.Tournament;
+import com.example.foosball.views.responses.BaseResponse;
+import com.example.foosball.views.responses.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,13 +20,17 @@ public class FoosballController {
     private FoosballService foosballService;
 
     @Autowired
-    public FoosballController() {
-        this.foosballService = new FoosballService();
+    public FoosballController(PlayerRepository playerRepository, TournamentRepository tournamentRepository, TournamentPlayerRepository tournamentPlayerRepository) {
+        this.foosballService = new FoosballService(playerRepository, tournamentRepository, tournamentPlayerRepository);
     }
 
     @GetMapping("/players")
-    public BaseResponse getAllPlayers() {
-        return new BaseResponse(foosballService.getPlayers(), null);
+    public BaseResponse getAllPlayers() throws Exception {
+        try {
+            return new BaseResponse(foosballService.getAllPlayers(), null);
+        } catch (Exception e) {
+            return new BaseResponse(null, new ErrorResponse(e.getMessage()));
+        }
     }
 
     @GetMapping("/players/name/{name}")
@@ -44,13 +52,17 @@ public class FoosballController {
         } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
-        String payload = String.format("id:%d  name:%s  age:%d", player.getId(), player.getName(), player.getAge());
-        return new BaseResponse(payload, null);
+        String payload = String.format("id:%d name:%s age:%d", player.getPlayerId(), player.getName(), player.getAge());
+        return new BaseResponse(payload,null);
     }
 
     @PostMapping("/players")
-    public BaseResponse createPlayers(@RequestBody PlayerRequest playerRequest) {
-        return new BaseResponse(foosballService.createPlayers(playerRequest.getPlayers()), null);
+    public BaseResponse createPlayers(@RequestBody CreatePlayerRequest createPlayerRequest) {
+        try {
+            return new BaseResponse(foosballService.createPlayers(createPlayerRequest.getPlayers()), null);
+        } catch (Exception e) {
+            return new BaseResponse(null, new ErrorResponse(e.getMessage()));
+        }
     }
 
     @GetMapping("/tournaments/id/{id}")
@@ -77,43 +89,68 @@ public class FoosballController {
 
     @GetMapping("/tournaments")
     public BaseResponse getAllTournaments() {
-        return new BaseResponse(foosballService.getAllTournaments(), null);
+        try {
+            return new BaseResponse(foosballService.getAllTournaments(), null);
+        } catch (Exception e) {
+            return new BaseResponse(null, new ErrorResponse(e.getMessage()));
+        }
     }
 
     @PostMapping("/tournaments")
     public BaseResponse createTournament(@RequestBody CreateTournamentRequest createTournamentRequest) {
         try {
-            return new BaseResponse(foosballService.createTournament(createTournamentRequest.getName()), null);
+            return new BaseResponse(foosballService.createTournament(createTournamentRequest.getTournaments()), null);
         } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
     }
 
-    @PutMapping("/tournaments")
+    @PostMapping("/tournaments/players")
     public BaseResponse addPlayerTournament(@RequestBody AddPlayerToTournamentRequest addPlayerToTournamentRequest) {
         try {
-            new BaseResponse(foosballService.addPlayerTournament(addPlayerToTournamentRequest.getIdTournament(), addPlayerToTournamentRequest.getPlayer_name(), addPlayerToTournamentRequest.getPlayer_id()),null);
+            return new BaseResponse(foosballService.addPlayerTournament(addPlayerToTournamentRequest.getTournamentPlayers()),null);
         } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
-        return new BaseResponse("Player was added to tournament!",null);
     }
 
     @GetMapping("/tournaments/{id}/players")
     public BaseResponse getAllPlayersFromTournament(@PathVariable(value="id") int id) {
-        var players = new ArrayList<Player>();
+        var playersTournament = new ArrayList<TournamentPlayers>();
         try {
-            players = foosballService.getAllPlayersFromTournament(id);
+            playersTournament = foosballService.getAllPlayersFromTournament(id);
         } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }
-        return new BaseResponse(players,null);
+        return new BaseResponse(playersTournament,null);
+    }
+
+    @DeleteMapping("/players")
+    public BaseResponse removePlayer(@RequestBody DeletePlayerRequest deletePlayerRequest) {
+        try {
+            var player = new Player(deletePlayerRequest.getPlayer_id(), deletePlayerRequest.getName(), deletePlayerRequest.getAge());
+            foosballService.removePlayer(player);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new BaseResponse("Player was removed!", null);
     }
 
     @DeleteMapping("/tournaments")
+    public BaseResponse removeTournament(@RequestBody DeleteTournamentRequest deleteTournamentRequest) {
+        try {
+            var tournament = new Tournament(deleteTournamentRequest.getTournamentId(), deleteTournamentRequest.getName());
+            foosballService.removeTournament(tournament);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new BaseResponse("Tournament was removed!", null);
+    }
+
+    @DeleteMapping("/tournaments/players")
     public BaseResponse removePlayerFromTournament(@RequestBody DeletePlayerFromTournamentRequest deletePlayerFromTournamentRequest) {
         try {
-            foosballService.removePlayerFromTournament(deletePlayerFromTournamentRequest.getTournament_id(), deletePlayerFromTournamentRequest.getPlayer_id());
+            foosballService.removePlayerFromTournament(deletePlayerFromTournamentRequest.getId());
         } catch (Exception e) {
             return new BaseResponse(null, new ErrorResponse(e.getMessage()));
         }

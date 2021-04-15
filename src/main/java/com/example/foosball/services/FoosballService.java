@@ -1,67 +1,45 @@
 package com.example.foosball.services;
 
-import com.example.foosball.Player;
-import com.example.foosball.Tournament;
-import com.example.foosball.response.BaseResponse;
-import com.example.foosball.response.ErrorResponse;
+import com.example.foosball.models.TournamentPlayers;
+import com.example.foosball.repository.PlayerRepository;
+import com.example.foosball.models.Player;
+import com.example.foosball.models.Tournament;
+import com.example.foosball.repository.TournamentPlayerRepository;
+import com.example.foosball.repository.TournamentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javax.xml.crypto.Data;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 
+
+@Service
 public class FoosballService {
-    private ArrayList<Player> players;
-    private ArrayList<Tournament> tournaments;
-    private DatabaseService databaseService;
+    private final PlayerRepository playerRepository;
+    private final TournamentRepository tournamentRepository;
+    private final TournamentPlayerRepository tournamentPlayerRepository;
 
-
-    public FoosballService() {
-        this.players = new ArrayList<>();
-        this.tournaments = new ArrayList<>();
-        this.databaseService = new DatabaseService();
+    @Autowired
+    public FoosballService(PlayerRepository playerRepository, TournamentRepository tournamentRepository, TournamentPlayerRepository tournamentPlayerRepository) {
+        this.playerRepository = playerRepository;
+        this.tournamentRepository = tournamentRepository;
+        this.tournamentPlayerRepository = tournamentPlayerRepository;
     }
 
-    public ArrayList<Tournament> getTournaments() {
-        return tournaments;
-    }
-
-    public ArrayList<Player> getPlayers() {
-        ArrayList listPlayers = new ArrayList();
+    public ArrayList<Player> getAllPlayers() throws Exception {
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            String query = "SELECT * FROM players";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            while(rs.next()) {
-                var player = new Player(rs.getInt("player_id"), rs.getString("name"), rs.getInt("age"));
-                listPlayers.add(player);
-            }
-            st.close();
+            ArrayList<Player> list = new ArrayList<>();
+            playerRepository.findAll().forEach(list::add);
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e);
         }
-        catch (Exception e) {
-            throw new IllegalArgumentException("Invalid ID");
-        }
-        return listPlayers;
     }
 
     public Player getPlayerByName(String name) throws Exception{
-        //esta bien esto?
-        Player player = new Player();
+        Player player;
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            String query = String.format("SELECT * FROM players WHERE name = '%s'", name);
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            if(rs.next()) {
-                //var player = new Player(rs.getInt("player_id") + " " + rs.getString("name") + " " + rs.getInt("age"));
-                player.setId(rs.getInt("player_id"));
-                player.setName(rs.getString("name"));
-                player.setAge(rs.getInt("age"));
-                st.close();
-            }
+            player = playerRepository.getByName(name);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -70,127 +48,74 @@ public class FoosballService {
         return player;
     }
 
-    public Player getPlayerByID(int id) throws Exception{
-        var player = new Player();
+    public Player getPlayerByID(int id) throws Exception {
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            String query = String.format("SELECT * FROM players WHERE player_id = %d",id);
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            if(rs.next()) {
-                //var player = new Player(rs.getInt("player_id") + " " + rs.getString("name") + " " + rs.getInt("age"));
-                player.setId(rs.getInt("player_id"));
-                player.setName(rs.getString("name"));
-                player.setAge(rs.getInt("age"));
-                st.close();
-            }
+            var player = new Player(playerRepository.findById(id).get().getPlayerId(), playerRepository.findById(id).get().getName(), playerRepository.findById(id).get().getAge());
+            return player;
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        catch (Exception e){
             throw new Exception(e);
         }
-        return player;
     }
 
-    public String createPlayers(ArrayList<Player> listPlayers) {
-        ArrayList<Player> lista = listPlayers;
+    public String createPlayers(ArrayList<Player> listPlayers) throws Exception {
+        ArrayList<Player> list = listPlayers;
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            Statement st = conn.createStatement();
-            for(int i = 0; i < lista.size(); i++) {
-                String name = lista.get(i).getName();
-                int age = lista.get(i).getAge();
-                String query = String.format("INSERT INTO players(name, age) VALUES('%s', %d)", name, age );
-                int rowsAffected = st.executeUpdate(query);
-            }
-            st.close();
+            playerRepository.saveAll(listPlayers).forEach(list::add);
         }
         catch (Exception e) {
-            throw new IllegalArgumentException("Invalid ID");
+            throw new Exception(e);
         }
         return "Players created!";
     }
 
-    public ArrayList<Tournament> getAllTournaments() {
-        ArrayList<Tournament> lista = new ArrayList();
+    public ArrayList<Tournament> getAllTournaments() throws Exception {
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            String query = "SELECT * FROM tournaments";
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            while(rs.next()) {
-                var tournament = new Tournament(rs.getInt("tournament_id"), rs.getString("name"));
-                lista.add(tournament);
-            }
-            st.close();
-            return lista;
-        }
-        catch (Exception e) {
-            throw new IllegalArgumentException("Invalid ID");
+            ArrayList<Tournament> list = new ArrayList<>();
+            tournamentRepository.findAll().forEach(list::add);
+            return list;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(e);
         }
     }
 
-    public String createTournament(String name) throws Exception {
+    public String createTournament(ArrayList<Tournament> listTournaments) throws Exception {
+        ArrayList<Tournament> list = listTournaments;
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            String query = String.format("INSERT INTO tournaments(name) VALUES('%s')", name);
-            System.out.println(query);
-            Statement st = conn.createStatement();
-            int rowsAffected = st.executeUpdate(query);
-            System.out.println("rowsAffected" + rowsAffected);
-            st.close();
+            tournamentRepository.saveAll(listTournaments).forEach(list::add);
         }
         catch (Exception e) {
             throw new Exception(e);
         }
-
-        return "Tournament was created!";
+        return "Tournaments created!";
     }
 
-    public String addPlayerTournament(int idTournament, String player_name, int player_id) throws Exception {
+    public String addPlayerTournament(ArrayList<TournamentPlayers> listTournamentPlayer) throws Exception {
+        ArrayList<TournamentPlayers> list = listTournamentPlayer;
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            Statement st = conn.createStatement();
-            String query = String.format("INSERT INTO tournament_players VALUES(%d,'%s',%d)", idTournament, player_name, player_id);
-            int rowsAffected = st.executeUpdate(query);
-            st.close();
+            tournamentPlayerRepository.saveAll(listTournamentPlayer).forEach(list::add);
         }
         catch (Exception e) {
             throw new Exception(e);
         }
-        return player_name + " added to tournament!";
+        return "Player was added to tournament";
     }
 
-    //in this case there is no exception because the method called in this method has already an exception
-
-    public ArrayList<Player> getAllPlayersFromTournament(int tournament_id) throws Exception{
-        ArrayList<Player> lista = new ArrayList<>();
+    public ArrayList<TournamentPlayers> getAllPlayersFromTournament(int tournament_id) throws Exception{
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            Statement st = conn.createStatement();
-            String query = String.format("SELECT * FROM tournament_players WHERE id = %d", tournament_id);
-            ResultSet rs = st.executeQuery(query);
-            while(rs.next()) {
-                var player = new Player(rs.getInt("id"), rs.getString("player_name"), rs.getInt("player_id"));
-                lista.add(player);
-            }
+            ArrayList<TournamentPlayers> list;
+            list = tournamentPlayerRepository.findAllByTournamentId(tournament_id);
+            return list;
         } catch (Exception e) {
             throw new Exception(e);
         }
-        return lista;
     }
 
     public Tournament getTournamentByName(String name) throws Exception {
-        var tournament = new Tournament();
+        Tournament tournament;
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            String query = String.format("SELECT * FROM tournaments WHERE name = '%s'", name);
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            if(rs.next()) {
-                tournament.setId(rs.getInt("tournament_id"));
-                tournament.setName(rs.getString("name"));
-            }            st.close();
+            tournament = tournamentRepository.getByName(name);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -200,31 +125,43 @@ public class FoosballService {
     }
 
     public Tournament getTournamentByID(int id) throws Exception {
-        var tournament = new Tournament();
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            String query = String.format("SELECT * FROM tournaments WHERE tournament_id = %d ", id);
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(query);
-            if(rs.next()) {
-                tournament.setId(rs.getInt("tournament_id"));
-                tournament.setName(rs.getString("name"));
-            }
-            st.close();
+            var tournament = new Tournament(tournamentRepository.findById(id).get().getTournamentId(), tournamentRepository.findById(id).get().getName());
+            return tournament;
         }
-        catch (Exception e) {
+        catch (Exception e){
             throw new Exception(e);
         }
-        return tournament;
     }
 
-    public String removePlayerFromTournament(int tournament_id, int player_id) throws Exception{
+    // preguntar en caso de que una funcion a largo plazo si hacerla ahora (un jugador en dos torneos distintos)
+    public String removePlayer(Player player) throws Exception{
         try {
-            Connection conn = DriverManager.getConnection(databaseService.getUrl(), "root", "root");
-            String query = String.format("DELETE FROM tournament_players WHERE id = %d AND player_id = %d", tournament_id, player_id);
-            Statement st = conn.createStatement();
-            int affectedRow = st.executeUpdate(query);
-            st.close();
+            playerRepository.delete(player);
+            var playerTournament = tournamentPlayerRepository.getByPlayerId(player.getPlayerId());
+            tournamentPlayerRepository.delete(playerTournament.get(0));
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
+        return "Player was removed!";
+    }
+
+    public String removeTournament(Tournament tournament) throws Exception{
+        try {
+            tournamentRepository.delete(tournament);
+            var playerTournament = tournamentPlayerRepository.findAllByTournamentId(tournament.getTournamentId());
+            for(TournamentPlayers p: playerTournament)
+                tournamentPlayerRepository.delete(p);
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
+        return "Tournament was removed!";
+    }
+
+    public String removePlayerFromTournament(int id) throws Exception{
+        try {
+            var tournamentPlayer = tournamentPlayerRepository.getByPlayerId(id);
+            tournamentPlayerRepository.delete(tournamentPlayer.get(0));
         } catch (Exception e) {
             throw new Exception(e);
         }

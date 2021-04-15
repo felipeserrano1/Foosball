@@ -1,10 +1,10 @@
-package com.example.foosball.request;
+package com.example.foosball.views.requests;
 
-import com.example.foosball.Player;
+import com.example.foosball.models.Player;
 
 import java.util.ArrayList;
 
-public class PlayerRequest {
+public class CreatePlayerRequest {
     private ArrayList<Player> players;
 
     public ArrayList<Player> getPlayers() {

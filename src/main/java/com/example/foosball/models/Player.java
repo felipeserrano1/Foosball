@@ -1,18 +1,19 @@
-package com.example.foosball;
+package com.example.foosball.models;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import javax.persistence.*;
 
+@Entity(name = "players")
 public class Player {
-
-    //private static final AtomicInteger count = new AtomicInteger(0);
-    //private int id = 0;
-    private int id;
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name = "player_id")
+    private int playerId;
+    @Column(name = "player_name")
     private String name;
     private int age;
 
-    public Player(int id, String name, int age) {
-        //this.id = count.incrementAndGet();
-        this.id = id;
+    public Player(int playerId, String name, int age) {
+        this.playerId = playerId;
         this.name = name;
         this.age = age;
     }
@@ -31,10 +32,6 @@ public class Player {
         this.name = name;
     }
 
-    public int getId() {
-        return id;
-    }
-
     public int getAge() {
         return age;
     }
@@ -43,8 +40,12 @@ public class Player {
         this.age = age;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public int getPlayerId() {
+        return playerId;
+    }
+
+    public void setPlayerId(int playerId) {
+        this.playerId = playerId;
     }
 
     public void setName(String name) {
@@ -53,10 +54,10 @@ public class Player {
 
     @Override
     public String toString() {
-        return "PlayerRequest{" +
+        return "CreatePlayerRequest{" +
                 "name='" + name + '\'' +
-                "id=" + id + '\'' +
-                "age=" + id + '\'' +
+                "id=" + playerId + '\'' +
+                "age=" + age + '\'' +
                 '}';
     }
 }
